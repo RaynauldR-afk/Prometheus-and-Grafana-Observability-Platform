@@ -1,0 +1,23 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+.pytest_cache/
+.coverage
+htmlcov/
+*.log
+.DS_Store
+Thumbs.db
+
+# Prometheus runtime data
+prometheus-data/
+monitoring/prometheus-data/
+
+# Python virtual environments and caches
+.venv/
+__pycache__/
+*.py[cod]
+
+# Local environment secrets
+.env

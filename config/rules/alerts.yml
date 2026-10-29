@@ -1,0 +1,50 @@
+groups:
+  - name: application-availability
+    rules:
+      - alert: ApplicationTargetDown
+        expr: up{job="observability-api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "Observability API target is down"
+          description: "Prometheus has been unable to scrape the API for at least one minute."
+          runbook_url: "https://github.com/REPLACE_WITH_YOUR_USERNAME/observability-platform#troubleshooting"
+
+  - name: application-performance
+    rules:
+      - alert: HighRequestLatency
+        expr: histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket{job="observability-api"}[5m]))) > 1
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "API p95 request latency is high"
+          description: "The 95th percentile HTTP request latency has exceeded one second for five minutes."
+
+      - alert: ElevatedHttp5xxRate
+        expr: |
+          (
+            sum(rate(http_requests_total{job="observability-api", status=~"5.."}[5m]))
+            /
+            clamp_min(sum(rate(http_requests_total{job="observability-api"}[5m])), 0.001)
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Elevated HTTP 5xx response rate"
+          description: "More than 5% of observed HTTP requests are returning server-side errors."
+
+      - alert: HighSystemMemoryUsage
+        expr: system_memory_percent > 90
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "System memory usage is above 90%"
+          description: "Investigate memory pressure on the host running the application."
